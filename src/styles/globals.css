@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply m-0 box-border p-0;
+  }
+  body {
+    font-family: "Poppins", serif;
+  }
+}
+
+@layer components {
+  .btn-home {
+    @apply w-full transform rounded-lg bg-[#a2884f] px-8 py-4 text-white transition-all duration-300 ease-in-out hover:scale-105 dark:bg-slate-100 dark:text-zinc-800;
+  }
+}
