@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /**
  * This is the client-side entrypoint for your tRPC API. It is used to create the `api` object which
  * contains the Next.js App-wrapper, as well as your type-safe React Query hooks.
@@ -10,7 +12,7 @@ import { type inferRouterInputs, type inferRouterOutputs } from "@trpc/server";
 import superjson from "superjson";
 import { type AppRouter } from "~/server/api/root";
 
-const getBaseUrl = () => {
+export const getBaseUrl = () => {
   if (typeof window !== "undefined") return ""; // browser should use relative url
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`; // SSR should use vercel url
   return `http://localhost:${process.env.PORT ?? 3000}`; // dev SSR should use localhost
@@ -18,8 +20,19 @@ const getBaseUrl = () => {
 
 /** A set of type-safe react-query hooks for your tRPC API. */
 export const api = createTRPCNext<AppRouter>({
-  config() {
+  config({ ctx }) {
     return {
+      headers: () => {
+        if (ctx?.req) {
+          // on ssr, forward client's headers to the server
+          return {
+            ...ctx.req.headers,
+            "x-ssr": "1",
+          };
+        }
+        return {};
+      },
+
       /**
        * Transformer used for data de-serialization from the server.
        *
@@ -40,6 +53,12 @@ export const api = createTRPCNext<AppRouter>({
         }),
         httpBatchLink({
           url: `${getBaseUrl()}/api/trpc`,
+          fetch(url, options) {
+            return fetch(url, {
+              ...options,
+              credentials: "include",
+            });
+          },
         }),
       ],
     };

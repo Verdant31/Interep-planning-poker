@@ -1,10 +1,14 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import Image from "next/image";
 
 import { Dialog, Transition } from "@headlessui/react";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
+import { setCookie } from "nookies";
 import { Fragment, useEffect, useState } from "react";
 import { ClipLoader } from "react-spinners";
+import { getUser } from "~/queries/getUser";
 import { api } from "~/utils/api";
 
 interface MyModalProps {
@@ -56,20 +60,28 @@ export default function Home() {
   const [isJoinSessionModalOpen, setIsJoinSessionModalOpen] = useState(false);
   const [isRedirectModalOpen, setIsRedirectModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [username, setUsername] = useState("");
 
   const [sessionId, setSessionId] = useState("");
 
   const createSessionMutation = api.session.createSession.useMutation();
+  const createUserMutation = api.user.createUser.useMutation();
 
-  const handleJoinSession = async () => {
+  const { data: user, refetch } = useQuery(["user"], getUser);
+
+  const handleStartSession = async () => {
     setIsLoading(true);
+    const user = await createUserMutation.mutateAsync({ name: username });
+    setCookie(undefined, "userId", user.id, {
+      path: "/",
+    });
+    await refetch();
     await createSessionMutation
       .mutateAsync()
       .then(async (res) => {
         if (res) {
           setIsLoading(false);
           const url = `${window.location.origin}/session/${res.id}`;
-          console.log(url);
           await navigator.clipboard.writeText(url);
           setSessionId(res.id);
           setIsRedirectModalOpen(true);
@@ -91,7 +103,10 @@ export default function Home() {
       />
 
       <div className="mb-8 flex flex-col items-center gap-6">
-        <button className="btn-home" onClick={handleJoinSession}>
+        <button
+          className="btn-home"
+          onClick={() => setIsRedirectModalOpen(true)}
+        >
           Iniciar nova sessão
         </button>
         <button
@@ -112,18 +127,39 @@ export default function Home() {
         closeModal={() => setIsRedirectModalOpen(false)}
       >
         <div className="mr-[6px]">
-          <p>
-            A URL para compartilhar a sessão foi copiada para o seu clipboard,
-            você sera{" "}
-            <span
-              className="cursor-pointer underline"
-              onClick={() => router.push(`/session/${sessionId}`)}
-            >
-              redirecionado
-            </span>{" "}
-            para a sessão em....
-          </p>
-          <Countdown />
+          {user ? (
+            <>
+              <p>
+                A URL para compartilhar a sessão foi copiada para o seu
+                clipboard, você sera{" "}
+                <span
+                  className="cursor-pointer underline"
+                  onClick={() => router.push(`/session/${sessionId}`)}
+                >
+                  redirecionado
+                </span>{" "}
+                para a sessão em....
+              </p>
+              <Countdown />
+            </>
+          ) : (
+            <div className="mr-[6px]">
+              <h1>Insira um nome de usuário:</h1>
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Ex: d1864bad-73fc-43b9-9ef6-fce142012fba"
+                className="mt-2 w-full rounded-md border-[1px] border-gray-400 p-2 pl-4 text-black outline-none"
+              />
+              <button
+                onClick={handleStartSession}
+                className="mt-4 h-12 w-full bg-[#a2884f] text-white dark:bg-zinc-900"
+              >
+                Confirmar
+              </button>
+            </div>
+          )}
         </div>
       </Modal>
       <Modal
