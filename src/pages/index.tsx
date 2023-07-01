@@ -1,20 +1,18 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-misused-promises */
 import Image from "next/image";
 
 import { Dialog, Transition } from "@headlessui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { setCookie } from "nookies";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, ReactNode, useEffect, useState } from "react";
 import { ClipLoader } from "react-spinners";
-import { getUser } from "~/queries/getUser";
+import { getUseriD } from "~/queries/getUser";
 import { api } from "~/utils/api";
 
 interface MyModalProps {
   isOpen: boolean;
   closeModal: () => void;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 function Modal({ isOpen, closeModal, children }: MyModalProps) {
@@ -64,12 +62,18 @@ export default function Home() {
 
   const createSessionMutation = api.session.createSession.useMutation();
   const createUserMutation = api.user.createUser.useMutation();
+  const findUserMutation = api.user.findUser.useMutation();
+
   const router = useRouter();
 
-  const { data: user, refetch } = useQuery(["user"], getUser);
+  const { data: user, refetch } = useQuery(["user"], async () => {
+    const id = getUseriD();
+    if (!id) return;
+    return await findUserMutation.mutateAsync({ id });
+  });
 
   useEffect(() => {
-    void refetch();
+    refetch();
   }, [refetch, sessionId]);
 
   const handleStartSession = async () => {
@@ -78,7 +82,8 @@ export default function Home() {
       .then(async (res) => {
         if (res) {
           setIsLoading(false);
-          const url = `${window.location.origin}/session/${res.id}`;
+          const url = `${window.location.origin}/session/${res.id}?userId=${user?.id}`;
+          console.log(url);
           await navigator.clipboard.writeText(url);
           setSessionId(res.id);
           setIsRedirectModalOpen(true);

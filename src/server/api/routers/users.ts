@@ -13,4 +13,14 @@ export const usersRouter = createTRPCRouter({
       });
       return user;
     }),
+  findUser: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ input }) => {
+      const user = await prisma.user.findUnique({
+        where: {
+          id: input.id,
+        },
+      });
+      return user;
+    }),
 });

@@ -2,8 +2,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { parseCookies } from "nookies";
 
-export const getUser = () => {
+export const getUseriD = () => {
   const cookies = parseCookies();
-  const user = cookies.userId ? cookies.userId : null;
-  return user;
+  const id = cookies.userId ? cookies.userId : null;
+
+  return id;
 };

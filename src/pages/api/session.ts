@@ -8,9 +8,23 @@ export default async function handler(
   res: NextApiResponse
 ) {
   try {
-    const { sessionId } = JSON.parse(req.body);
-    const session = await prisma.session.findFirst({
+    const { sessionId, userId } = JSON.parse(req.body);
+    const session = await prisma.session.update({
       where: { id: sessionId as string },
+      data: {
+        users: {
+          connect: { id: userId as string },
+        },
+      },
+      select: {
+        id: true,
+        users: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
     });
     return res.status(200).json({ session });
   } catch (err) {
