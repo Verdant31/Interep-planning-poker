@@ -56,26 +56,23 @@ function Modal({ isOpen, closeModal, children }: MyModalProps) {
 }
 
 export default function Home() {
-  const router = useRouter();
   const [isJoinSessionModalOpen, setIsJoinSessionModalOpen] = useState(false);
   const [isRedirectModalOpen, setIsRedirectModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [username, setUsername] = useState("");
-
   const [sessionId, setSessionId] = useState("");
 
   const createSessionMutation = api.session.createSession.useMutation();
   const createUserMutation = api.user.createUser.useMutation();
+  const router = useRouter();
 
   const { data: user, refetch } = useQuery(["user"], getUser);
 
+  useEffect(() => {
+    void refetch();
+  }, [refetch, sessionId]);
+
   const handleStartSession = async () => {
-    setIsLoading(true);
-    const user = await createUserMutation.mutateAsync({ name: username });
-    setCookie(undefined, "userId", user.id, {
-      path: "/",
-    });
-    await refetch();
     await createSessionMutation
       .mutateAsync()
       .then(async (res) => {
@@ -91,6 +88,13 @@ export default function Home() {
         setIsLoading(false);
         console.log(err);
       });
+  };
+
+  const handleCreateUserAndStartSession = async () => {
+    setIsLoading(true);
+    const res = await createUserMutation.mutateAsync({ name: username });
+    setCookie(null, "userId", res.id);
+    await handleStartSession();
   };
 
   return (
@@ -140,7 +144,7 @@ export default function Home() {
                 </span>{" "}
                 para a sessão em....
               </p>
-              <Countdown />
+              <Countdown handleStartSession={handleStartSession} />
             </>
           ) : (
             <div className="mr-[6px]">
@@ -153,7 +157,7 @@ export default function Home() {
                 className="mt-2 w-full rounded-md border-[1px] border-gray-400 p-2 pl-4 text-black outline-none"
               />
               <button
-                onClick={handleStartSession}
+                onClick={handleCreateUserAndStartSession}
                 className="mt-4 h-12 w-full bg-[#a2884f] text-white dark:bg-zinc-900"
               >
                 Confirmar
@@ -182,10 +186,15 @@ export default function Home() {
   );
 }
 
-function Countdown() {
+interface CountdownProps {
+  handleStartSession: () => void;
+}
+
+function Countdown({ handleStartSession }: CountdownProps) {
   const [time, setTime] = useState(10);
 
   useEffect(() => {
+    if (time === 10) handleStartSession();
     const timer = setTimeout(() => {
       setTime(time - 1);
     }, 1000);
