@@ -1,7 +1,6 @@
 import { type GetServerSideProps } from "next";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import io from "socket.io-client";
-import { getBaseUrl } from "~/utils/api";
 
 const socket = io("http://localhost:3001");
 
@@ -10,47 +9,36 @@ interface SessionProps {
 }
 
 export default function Session({ session }: SessionProps) {
-  const sendMessage = () => {
-    socket.emit("send_message", {
-      message: "Hello World",
-      sessionId: session.id,
-    });
-  };
-
+  const [alreadyJoined, setAlreadyJoined] = useState(false);
   useEffect(() => {
-    if (!session) return;
-    socket.emit("joinSession", session.id);
-  }, [session]);
+    if (!session || alreadyJoined) return;
+    socket.emit("joinSession", { sessionId: session.id, user: session.user });
 
-  useEffect(() => {
-    socket.on("receive_message", (data) => {
-      alert(data);
+    socket.on("joinedSession", (data) => {
+      console.log(data);
+      setAlreadyJoined(true);
     });
   }, []);
 
   return (
     <main className="mx-auto mt-32 flex w-96 flex-col items-center gap-12">
       <h1 className="text-white">{session?.id}</h1>
-      <button onClick={sendMessage}>Send Message</button>
     </main>
   );
 }
 
 export const getServerSideProps: GetServerSideProps = async ({ query }) => {
-  const { sessionId, userId } = query;
+  const { sessionId, userId, username } = query;
 
-  const { session } = await fetch(`${getBaseUrl()}/api/session`, {
-    method: "POST",
-    body: JSON.stringify({ sessionId, userId }),
-  }).then((res) => {
-    if (res.ok) {
-      return res.json();
-    }
-  });
-  console.log(session.users);
   return {
     props: {
-      session,
+      session: {
+        id: sessionId,
+        user: {
+          id: userId,
+          name: username,
+        },
+      },
     },
   };
 };
