@@ -19,7 +19,7 @@ export const useHome = () => {
   const [isJoinSessionModalOpen, setIsJoinSessionModalOpen] = useState(false);
   const [isRedirectModalOpen, setIsRedirectModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [username, setUsername] = useState("");
+  const [username, setUsername] = useState("Joaozin");
   const [sessionId, setSessionId] = useState("");
 
   const createSessionMutation = api.session.createSession.useMutation();
