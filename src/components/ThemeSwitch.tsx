@@ -8,7 +8,7 @@ interface ThemeSwitchProps {
 
 export const ThemeSwitch = ({ mode, setMode }: ThemeSwitchProps) => {
   return (
-    <div className="absolute right-6 top-6">
+    <div className="absolute right-6 top-6 z-50">
       <DarkModeToggle
         mode={mode}
         dark="Dark"

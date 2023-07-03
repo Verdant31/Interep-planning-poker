@@ -1,17 +1,20 @@
 /* eslint-disable react-hooks/exhaustive-deps */
+import { type Mode } from "@anatoliygatt/dark-mode-toggle";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useCallback } from "react";
 import { PacmanLoader } from "react-spinners";
 import { useHome } from "~/hooks/useHome";
+import { TailwindMode } from "~/pages/_app";
 import { Countdown } from "./Countdown";
 
 interface ModalProps {
   isOpen: boolean;
   type: "join" | "redirect" | undefined;
   closeModal: () => void;
+  mode: Mode;
 }
 
-export const Modal = ({ isOpen, type, closeModal }: ModalProps) => {
+export const Modal = ({ isOpen, type, closeModal, mode }: ModalProps) => {
   const { hasUser } = useHome();
 
   const getContent = useCallback(() => {
@@ -48,7 +51,9 @@ export const Modal = ({ isOpen, type, closeModal }: ModalProps) => {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+              <Dialog.Panel
+                className={`${TailwindMode[mode]} w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all `}
+              >
                 {getContent()}
               </Dialog.Panel>
             </Transition.Child>
@@ -91,7 +96,7 @@ Modal.CreateUser = function CreateUserContent() {
       />
       <button
         onClick={handleCreateUserAndStartSession}
-        className="mt-4 h-12 w-full bg-[#a2884f] text-white dark:bg-zinc-900"
+        className="mt-4 h-12 w-full bg-[#a2884f] text-white dark:bg-emerald-600"
       >
         Confirmar
       </button>
@@ -99,7 +104,7 @@ Modal.CreateUser = function CreateUserContent() {
         <div className="mt-8 flex justify-center">
           <PacmanLoader
             loading={true}
-            color="#a2884f"
+            color="#059669"
             size={20}
             aria-label="Loading Spinner"
           />
@@ -123,7 +128,7 @@ Modal.JoinSession = function JoinSessionContent() {
       />
       <button
         onClick={handleRedirectToSession}
-        className="mt-4 h-12 w-full bg-[#a2884f] text-white dark:bg-zinc-900"
+        className="mt-4 h-12 w-full bg-[#a2884f] text-white dark:bg-emerald-600"
       >
         Entrar na sessão
       </button>

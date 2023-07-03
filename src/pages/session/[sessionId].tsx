@@ -1,8 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { motion } from "framer-motion";
-import { useRouter } from "next/router";
+import { GetServerSideProps } from "next";
 import { useEffect, useState } from "react";
 import io from "socket.io-client";
+import { DefaultInterface } from "~/types";
 import { getPositionByIndex } from "~/utils/getPositionByIndex";
 
 const fibonnaciSequence = [1, 2, 3, 5, 8, 13, 21, 34, 55];
@@ -15,20 +16,31 @@ type User = {
   card?: number;
 };
 
-export default function Session() {
+interface SessionProps extends DefaultInterface {
+  sessionId: string;
+  userId: string;
+  username: string;
+}
+
+export default function Session({
+  mode,
+  sessionId,
+  userId,
+  username,
+}: SessionProps) {
   const [alreadyJoined, setAlreadyJoined] = useState(false);
   const [revealCards, setRevealCards] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
 
-  const router = useRouter();
-  const { sessionId, userId, username } = router.query;
-
   useEffect(() => {
+    console.log(alreadyJoined);
+    console.log(sessionId);
     if (!sessionId || alreadyJoined) return;
     socket.emit("joinSession", {
       sessionId,
       user: { id: userId, name: username, card: null },
     });
+    console.log("opa");
 
     socket.on("joinedSession", (users) => {
       setUsers(users);
@@ -106,9 +118,9 @@ export default function Session() {
           onClick={() =>
             !revealCards ? handleRevealCards() : handleResetGame()
           }
-          className=" absolute left-[50%] top-[50%] flex h-12 w-60 translate-x-[-50%] translate-y-[-50%] transform items-center justify-center rounded-lg bg-emerald-600"
+          className=" absolute left-[50%] top-[50%] flex h-12 w-60 translate-x-[-50%] translate-y-[-50%] transform items-center justify-center rounded-lg bg-[#a2884f] text-white dark:bg-emerald-600"
         >
-          <h1 className="text-md cursor-pointer font-semibold uppercase tracking-wider text-white">
+          <h1 className="text-md cursor-pointer font-semibold uppercase tracking-wider ">
             {!revealCards ? "Revelar cartas" : "Nova rodada"}
           </h1>
         </button>
@@ -121,11 +133,11 @@ export default function Session() {
                 style={getPositionByIndex(index)}
                 key={user.id}
               >
-                <h1 className="text-xl text-white">
+                <h1 className="text-xl dark:text-white">
                   {user.name === username ? "Eu" : user.name}
                 </h1>
                 {user.card && (
-                  <h1 className="mt-1 text-sm font-semibold uppercase text-emerald-600">
+                  <h1 className="mt-1 text-sm font-semibold uppercase text-[#a2884f] dark:text-emerald-600">
                     votou
                   </h1>
                 )}
@@ -136,7 +148,7 @@ export default function Session() {
                     }}
                     initial={{ scale: 0, x: -50 }}
                     animate={{ scale: 1.5, x: 0 }}
-                    className="mt-2 text-sm font-semibold uppercase text-emerald-500"
+                    className="mt-2 text-sm font-semibold uppercase text-[#a2884f] dark:text-emerald-600"
                   >
                     {user.card}
                   </motion.h1>
@@ -151,13 +163,38 @@ export default function Session() {
           <div
             onClick={() => handleChooseCard(number)}
             key={number}
-            style={{ background: whoami?.card === number ? "#059669" : "" }}
-            className="flex h-32 w-16 cursor-pointer items-center justify-center rounded-md border-[1px] border-emerald-600"
+            style={
+              whoami?.card === number
+                ? {
+                    background: mode === "dark" ? "#059669" : "#a2884f",
+                  }
+                : {}
+            }
+            className="flex h-32 w-16 cursor-pointer items-center justify-center rounded-md border-[1px] border-[#a2884f] dark:border-emerald-600"
           >
-            <h1 className="text-xl font-semibold text-white">{number}</h1>
+            <h1
+              style={{
+                color:
+                  whoami?.card === number && mode === "light" ? "white" : "",
+              }}
+              className="text-xl font-semibold text-zinc-600 dark:text-white"
+            >
+              {number}
+            </h1>
           </div>
         ))}
       </div>
     </div>
   );
 }
+
+export const getServerSideProps: GetServerSideProps = async ({ query }) => {
+  const { sessionId, userId, username } = query;
+  return {
+    props: {
+      sessionId,
+      userId,
+      username,
+    },
+  };
+};
