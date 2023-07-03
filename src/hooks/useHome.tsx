@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { parseCookies, setCookie } from "nookies";
 import { useCallback, useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
 import { api } from "~/utils/api";
 
@@ -37,25 +38,27 @@ export const useHome = () => {
     );
   }, [router, sessionId, user]);
 
-  const handleStartSession = async () => {
+  const handleStartSession = async (copyUrl?: boolean | undefined) => {
     await createSessionMutation
       .mutateAsync()
       .then(async (res) => {
         if (res) {
           setIsLoading(false);
-          const url = `${window.location.origin}/session/${res.id}?userId=${user?.id}&username=${user?.name}`;
-          await navigator.clipboard.writeText(url);
+          if (copyUrl) {
+            const url = `${window.location.origin}/session/${res.id}?userId=${user?.id}&username=${user?.name}`;
+            await navigator.clipboard.writeText(url);
+          }
           setSessionId(res.id);
           setIsRedirectModalOpen(true);
         }
       })
       .catch((err) => {
         setIsLoading(false);
-        console.log(err);
+        toast.error(err);
       });
   };
 
-  const handleCreateUserAndStartSession = async () => {
+  const handleCreateUserAndStartSession = async (copyUrl?: boolean) => {
     setIsLoading(true);
     const user = {
       name: username,
@@ -63,7 +66,7 @@ export const useHome = () => {
     };
     refetch();
     setCookie(null, "user", JSON.stringify(user));
-    await handleStartSession();
+    await handleStartSession(copyUrl);
   };
 
   useEffect(() => {

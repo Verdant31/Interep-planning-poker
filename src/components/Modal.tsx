@@ -18,7 +18,7 @@ export const Modal = ({ isOpen, type, closeModal, mode }: ModalProps) => {
   const { hasUser } = useHome();
 
   const getContent = useCallback(() => {
-    if (!hasUser) return <Modal.CreateUser />;
+    if (!hasUser) return <Modal.CreateUser type={type} />;
     if (type === "join") return <Modal.JoinSession />;
     if (type === "redirect") return <Modal.NewSession />;
   }, [hasUser, type]);
@@ -81,7 +81,10 @@ Modal.NewSession = function NewSessionContent() {
   );
 };
 
-Modal.CreateUser = function CreateUserContent() {
+interface CreateUserProps {
+  type: "join" | "redirect" | undefined;
+}
+Modal.CreateUser = function CreateUserContent({ type }: CreateUserProps) {
   const { username, isLoading, setUsername, handleCreateUserAndStartSession } =
     useHome();
   return (
@@ -95,7 +98,7 @@ Modal.CreateUser = function CreateUserContent() {
         className="mt-2 w-full rounded-md border-[1px] border-gray-400 p-2 pl-4 text-black outline-none"
       />
       <button
-        onClick={handleCreateUserAndStartSession}
+        onClick={() => handleCreateUserAndStartSession(type === "redirect")}
         className="mt-4 h-12 w-full bg-[#a2884f] text-white dark:bg-emerald-600"
       >
         Confirmar

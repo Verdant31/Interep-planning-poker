@@ -2,6 +2,7 @@
 import { motion } from "framer-motion";
 import { GetServerSideProps } from "next";
 import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import io from "socket.io-client";
 import { env } from "~/env.mjs";
 import { DefaultInterface } from "~/types";
@@ -31,6 +32,7 @@ export default function Session({
 }: SessionProps) {
   const [revealCards, setRevealCards] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
+
   useEffect(() => {
     if (!sessionId) return;
     console.log(sessionId);
@@ -39,7 +41,10 @@ export default function Session({
       user: { id: userId, name: username, card: null },
     });
 
-    socket.on("joinedSession", (users) => {
+    socket.on("joinedSession", ({ users, newUser }) => {
+      if (!(newUser.id === userId)) {
+        toast.info(`${newUser.name} entrou na sala`);
+      }
       setUsers(users);
     });
 
@@ -50,9 +55,27 @@ export default function Session({
       setUsers(users);
       setRevealCards(false);
     });
-    socket.on("cardsReveal", (users) => {
+    socket.on("cardsReveal", () => {
       setRevealCards(true);
     });
+    socket.on("userLeft", ({ users, leftUser }) => {
+      toast.info(`${leftUser.name} saiu da sala`);
+      setUsers(users);
+    });
+  }, []);
+
+  const handleTabClosing = () => {
+    socket.emit("userExited", {
+      sessionId,
+      user: { id: userId, name: username, card: null },
+    });
+  };
+
+  useEffect(() => {
+    window.addEventListener("unload", handleTabClosing);
+    return () => {
+      window.removeEventListener("unload", handleTabClosing);
+    };
   }, []);
 
   const handleChooseCard = (card: number) => {
@@ -90,18 +113,23 @@ export default function Session({
             initial={{ scale: 0, x: -200 }}
             transition={{ duration: 0.5 }}
             animate={{ scale: 1, x: 0 }}
-            className="mt-10 text-xl font-medium uppercase tracking-wider text-emerald-600"
+            className="mt-10 text-xl font-medium uppercase tracking-wider text-[#a2884f] dark:text-emerald-600"
           >
             Média(fibonnaci):
-            <span className="ml-2 text-white">{closestValue ?? 0}</span>
+            <span className="ml-2 text-zinc-700 dark:text-white">
+              {closestValue ?? 0}
+            </span>
           </motion.h1>
           <motion.h1
             initial={{ scale: 0, x: -200 }}
             transition={{ duration: 0.5 }}
             animate={{ scale: 1, x: 0 }}
-            className="text-xl font-medium uppercase tracking-wider text-emerald-600"
+            className="text-xl font-medium uppercase tracking-wider text-[#a2884f] dark:text-emerald-600"
           >
-            Média:<span className="ml-2 text-white">{mean ?? 0}</span>
+            Média:
+            <span className="ml-2 text-zinc-700 dark:text-white">
+              {mean ?? 0}
+            </span>
           </motion.h1>
         </div>
       )}
@@ -160,15 +188,19 @@ export default function Session({
 
       <div className="absolute bottom-16 flex items-center gap-6">
         {fibonnaciSequence.map((number) => (
-          <div
+          <button
+            disabled={revealCards}
             onClick={() => handleChooseCard(number)}
             key={number}
             style={
               whoami?.card === number
                 ? {
+                    cursor: revealCards ? "not-allowed" : "pointer",
                     background: mode === "dark" ? "#059669" : "#a2884f",
                   }
-                : {}
+                : {
+                    cursor: revealCards ? "not-allowed" : "pointer",
+                  }
             }
             className="flex h-32 w-16 cursor-pointer items-center justify-center rounded-md border-[1px] border-[#a2884f] dark:border-emerald-600"
           >
@@ -181,7 +213,7 @@ export default function Session({
             >
               {number}
             </h1>
-          </div>
+          </button>
         ))}
       </div>
     </div>

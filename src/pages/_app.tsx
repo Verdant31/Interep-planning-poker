@@ -2,6 +2,8 @@
 import { type Mode } from "@anatoliygatt/dark-mode-toggle";
 import { type AppType } from "next/app";
 import { useState } from "react";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { ThemeSwitch } from "~/components/ThemeSwitch";
 import "~/styles/globals.css";
 import { api } from "~/utils/api";
@@ -16,6 +18,8 @@ const MyApp: AppType = ({ Component, pageProps }) => {
 
   return (
     <div className={`${TailwindMode[mode]} relative flex h-screen w-[100%] `}>
+      <ToastContainer pauseOnHover={false} />
+
       <div className="h-full w-full dark:bg-zinc-900">
         <ThemeSwitch setMode={setMode} mode={mode} />
         <Component {...pageProps} mode={mode} />
