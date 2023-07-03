@@ -3,12 +3,13 @@ import { motion } from "framer-motion";
 import { GetServerSideProps } from "next";
 import { useEffect, useState } from "react";
 import io from "socket.io-client";
+import { env } from "~/env.mjs";
 import { DefaultInterface } from "~/types";
 import { getPositionByIndex } from "~/utils/getPositionByIndex";
 
 const fibonnaciSequence = [1, 2, 3, 5, 8, 13, 21, 34, 55];
 
-const socket = io("http://localhost:3001");
+const socket = io(env.NEXT_PUBLIC_API_URL);
 
 type User = {
   id: string;
