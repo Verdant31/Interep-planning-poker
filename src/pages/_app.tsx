@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { type Mode } from "@anatoliygatt/dark-mode-toggle";
 import { type AppType } from "next/app";
 import { useState } from "react";
