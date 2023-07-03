@@ -63,11 +63,45 @@ export default function Session() {
 
   let voteCount = 0;
 
+  const mean =
+    users.reduce((acc, user) => {
+      if (user.card) {
+        return acc + user.card;
+      }
+      return acc;
+    }, 0) / users?.map((user) => user.card).filter((card) => card).length;
+
+  const closestValue = fibonnaciSequence.reduce((prev, curr) =>
+    Math.abs(curr - mean) < Math.abs(prev - mean) ? curr : prev
+  );
+
   return (
     <div className="relative flex h-screen w-full flex-col items-center">
-      <h1>{sessionId}</h1>
-
-      <main className="relative mx-auto mt-[300px] flex w-[600px] flex-col items-center gap-12">
+      {revealCards && (
+        <div>
+          <motion.h1
+            initial={{ scale: 0, x: -200 }}
+            transition={{ duration: 0.5 }}
+            animate={{ scale: 1, x: 0 }}
+            className="mt-10 text-xl font-medium uppercase tracking-wider text-emerald-600"
+          >
+            Média(fibonnaci):
+            <span className="ml-2 text-white">{closestValue}</span>
+          </motion.h1>
+          <motion.h1
+            initial={{ scale: 0, x: -200 }}
+            transition={{ duration: 0.5 }}
+            animate={{ scale: 1, x: 0 }}
+            className="text-xl font-medium uppercase tracking-wider text-emerald-600"
+          >
+            Média:<span className="ml-2 text-white">{mean}</span>
+          </motion.h1>
+        </div>
+      )}
+      <main
+        style={{ marginTop: revealCards ? 250 : 310 }}
+        className="relative mx-auto flex w-[600px] flex-col items-center gap-12"
+      >
         <button
           onClick={() =>
             !revealCards ? handleRevealCards() : handleResetGame()
@@ -112,7 +146,7 @@ export default function Session() {
           })}
       </main>
 
-      <div className="absolute bottom-24 flex items-center gap-6">
+      <div className="absolute bottom-16 flex items-center gap-6">
         {fibonnaciSequence.map((number) => (
           <div
             onClick={() => handleChooseCard(number)}
