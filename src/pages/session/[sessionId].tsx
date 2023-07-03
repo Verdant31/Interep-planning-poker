@@ -13,7 +13,7 @@ const socket = io("http://localhost:3001");
 type User = {
   id: string;
   name: string;
-  card?: number;
+  card?: number | null;
 };
 
 interface SessionProps extends DefaultInterface {
@@ -28,23 +28,18 @@ export default function Session({
   userId,
   username,
 }: SessionProps) {
-  const [alreadyJoined, setAlreadyJoined] = useState(false);
   const [revealCards, setRevealCards] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
-
   useEffect(() => {
-    console.log(alreadyJoined);
+    if (!sessionId) return;
     console.log(sessionId);
-    if (!sessionId || alreadyJoined) return;
     socket.emit("joinSession", {
       sessionId,
       user: { id: userId, name: username, card: null },
     });
-    console.log("opa");
 
     socket.on("joinedSession", (users) => {
       setUsers(users);
-      setAlreadyJoined(true);
     });
 
     socket.on("cardChosen", (users) => {
@@ -54,7 +49,7 @@ export default function Session({
       setUsers(users);
       setRevealCards(false);
     });
-    socket.on("cardsReveal", () => {
+    socket.on("cardsReveal", (users) => {
       setRevealCards(true);
     });
   }, []);
@@ -86,7 +81,6 @@ export default function Session({
   const closestValue = fibonnaciSequence.reduce((prev, curr) =>
     Math.abs(curr - mean) < Math.abs(prev - mean) ? curr : prev
   );
-
   return (
     <div className="relative flex h-screen w-full flex-col items-center">
       {revealCards && (
@@ -98,7 +92,7 @@ export default function Session({
             className="mt-10 text-xl font-medium uppercase tracking-wider text-emerald-600"
           >
             Média(fibonnaci):
-            <span className="ml-2 text-white">{closestValue}</span>
+            <span className="ml-2 text-white">{closestValue ?? 0}</span>
           </motion.h1>
           <motion.h1
             initial={{ scale: 0, x: -200 }}
@@ -106,7 +100,7 @@ export default function Session({
             animate={{ scale: 1, x: 0 }}
             className="text-xl font-medium uppercase tracking-wider text-emerald-600"
           >
-            Média:<span className="ml-2 text-white">{mean}</span>
+            Média:<span className="ml-2 text-white">{mean ?? 0}</span>
           </motion.h1>
         </div>
       )}
@@ -143,8 +137,13 @@ export default function Session({
                 )}
                 {revealCards && user.card && (
                   <motion.h1
+                    // onAnimationComplete={() => {
+                    //   if (index + 1 === users.length) {
+                    //     setAnimationFinished(true);
+                    //   }
+                    // }}
                     transition={{
-                      delay: (voteCount + 1 * 0.1) / 2,
+                      delay: (voteCount + 1 * 0.07) / 2,
                     }}
                     initial={{ scale: 0, x: -50 }}
                     animate={{ scale: 1.5, x: 0 }}

@@ -18,13 +18,13 @@ export default function Home({ mode }: DefaultInterface) {
       </div>
       <div className="mb-8 mt-8 flex w-80  flex-col items-center gap-6">
         <button
-          className="btn-home h-14 font-sans text-lg"
+          className="btn-home font  h-14 text-lg dark:bg-emerald-600 dark:text-white"
           onClick={() => setModalState({ isOpen: true, type: "redirect" })}
         >
           Iniciar nova sessão
         </button>
         <button
-          className="btn-home h-14 font-sans text-lg"
+          className="btn-home font  h-14 text-lg dark:bg-emerald-600 dark:text-white"
           onClick={() => setModalState({ isOpen: true, type: "join" })}
         >
           Entrar em sessão existente
