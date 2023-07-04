@@ -12,7 +12,7 @@ const fibonnaciSequence = [1, 2, 3, 5, 8, 13, 21, 34, 55];
 
 const socket = io(env.NEXT_PUBLIC_API_URL);
 
-type User = {
+export type User = {
   id: string;
   name: string;
   card?: number | null;
@@ -105,8 +105,21 @@ export default function Session({
   const closestValue = fibonnaciSequence.reduce((prev, curr) =>
     Math.abs(curr - mean) < Math.abs(prev - mean) ? curr : prev
   );
+
+  const handleCopyUrl = async () => {
+    const url = window.location.href;
+    await navigator.clipboard.writeText(url);
+    toast.info("Link copiado para a área de transferência");
+  };
+
   return (
     <div className="relative flex h-screen w-full flex-col items-center">
+      <button
+        onClick={handleCopyUrl}
+        className="absolute left-8 top-8 text-xl tracking-wider text-white underline dark:text-emerald-500"
+      >
+        Link da sessão
+      </button>
       {revealCards && (
         <div>
           <motion.h1

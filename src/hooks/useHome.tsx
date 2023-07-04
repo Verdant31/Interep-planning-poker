@@ -2,14 +2,18 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { parseCookies, setCookie } from "nookies";
 import { useCallback, useEffect, useState } from "react";
-import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
-import { api } from "~/utils/api";
+import { User } from "~/pages/session/[sessionId]";
 
 export type ModalState = {
   isOpen: boolean;
   type: "join" | "redirect" | undefined;
 };
+
+export interface StartSessionProps {
+  createdUser?: User;
+  copyUrl?: boolean;
+}
 
 export const useHome = () => {
   const [modalState, setModalState] = useState<ModalState>({
@@ -23,7 +27,6 @@ export const useHome = () => {
   const [username, setUsername] = useState("Joaozin");
   const [sessionId, setSessionId] = useState("");
 
-  const createSessionMutation = api.session.createSession.useMutation();
   const router = useRouter();
 
   const { data: user, refetch } = useQuery(["user"], async () => {
@@ -38,24 +41,19 @@ export const useHome = () => {
     );
   }, [router, sessionId, user]);
 
-  const handleStartSession = async (copyUrl?: boolean | undefined) => {
-    await createSessionMutation
-      .mutateAsync()
-      .then(async (res) => {
-        if (res) {
-          setIsLoading(false);
-          if (copyUrl) {
-            const url = `${window.location.origin}/session/${res.id}?userId=${user?.id}&username=${user?.name}`;
-            await navigator.clipboard.writeText(url);
-          }
-          setSessionId(res.id);
-          setIsRedirectModalOpen(true);
-        }
-      })
-      .catch((err) => {
-        setIsLoading(false);
-        toast.error(err);
-      });
+  const handleStartSession = async ({
+    copyUrl,
+    createdUser,
+  }: StartSessionProps) => {
+    const finalUser = createdUser ?? user;
+    const sessionId = uuidv4();
+    if (copyUrl) {
+      const url = `${window.location.origin}/session/${sessionId}?userId=${finalUser?.id}&username=${finalUser?.name}`;
+      await navigator.clipboard.writeText(url);
+    }
+    setIsLoading(false);
+    setSessionId(sessionId);
+    setIsRedirectModalOpen(true);
   };
 
   const handleCreateUserAndStartSession = async (copyUrl?: boolean) => {
@@ -66,7 +64,7 @@ export const useHome = () => {
     };
     refetch();
     setCookie(null, "user", JSON.stringify(user));
-    await handleStartSession(copyUrl);
+    await handleStartSession({ copyUrl, createdUser: user });
   };
 
   useEffect(() => {

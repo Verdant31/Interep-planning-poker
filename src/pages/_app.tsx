@@ -18,8 +18,7 @@ const MyApp: AppType = ({ Component, pageProps }) => {
 
   return (
     <div className={`${TailwindMode[mode]} relative flex h-screen w-[100%] `}>
-      <ToastContainer pauseOnHover={false} />
-
+      <ToastContainer autoClose={1500} pauseOnHover={false} />
       <div className="h-full w-full dark:bg-zinc-900">
         <ThemeSwitch setMode={setMode} mode={mode} />
         <Component {...pageProps} mode={mode} />
