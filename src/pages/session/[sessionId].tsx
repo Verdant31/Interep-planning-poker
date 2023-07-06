@@ -134,7 +134,7 @@ export default function Session({
       />
       <button
         onClick={handleCopyUrl}
-        className="absolute left-8 top-8 text-xl tracking-wider text-white underline dark:text-emerald-500"
+        className="absolute left-8 top-8 text-xl tracking-wider text-[#a2884f] underline dark:text-emerald-500"
       >
         Link da sessão
       </button>
