@@ -4,6 +4,8 @@ import { GetServerSideProps } from "next";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import io from "socket.io-client";
+import { v4 as uuidv4 } from "uuid";
+import { SessionNewUserModal } from "~/components/SessionNewUserModal";
 import { env } from "~/env.mjs";
 import { DefaultInterface } from "~/types";
 import { getPositionByIndex } from "~/utils/getPositionByIndex";
@@ -32,22 +34,23 @@ export default function Session({
 }: SessionProps) {
   const [revealCards, setRevealCards] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
+  const [newUserName, setNewUserName] = useState("");
+  const [user, setUser] = useState<User | null>(
+    userId ? { id: userId, name: username, card: null } : null
+  );
 
   useEffect(() => {
-    if (!sessionId) return;
-    console.log(sessionId);
+    if (!sessionId || !user) return;
     socket.emit("joinSession", {
       sessionId,
-      user: { id: userId, name: username, card: null },
+      user: { id: user.id, name: user.name, card: null },
     });
-
     socket.on("joinedSession", ({ users, newUser }) => {
-      if (!(newUser.id === userId)) {
+      if (!(newUser.id === user.id)) {
         toast.info(`${newUser.name} entrou na sala`);
       }
       setUsers(users);
     });
-
     socket.on("cardChosen", (users) => {
       setUsers(users);
     });
@@ -62,14 +65,7 @@ export default function Session({
       toast.info(`${leftUser.name} saiu da sala`);
       setUsers(users);
     });
-  }, []);
-
-  const handleTabClosing = () => {
-    socket.emit("userExited", {
-      sessionId,
-      user: { id: userId, name: username, card: null },
-    });
-  };
+  }, [user]);
 
   useEffect(() => {
     window.addEventListener("unload", handleTabClosing);
@@ -78,11 +74,16 @@ export default function Session({
     };
   }, []);
 
-  const handleChooseCard = (card: number) => {
-    socket.emit("chooseCard", { sessionId, userId, card });
+  const handleTabClosing = () => {
+    socket.emit("userExited", {
+      sessionId,
+      user: { id: user?.id, name: username, card: null },
+    });
   };
 
-  const whoami = users.find((user) => user.id === userId);
+  const handleChooseCard = (card: number) => {
+    socket.emit("chooseCard", { sessionId, userId: user?.id, card });
+  };
 
   const handleResetGame = () => {
     socket.emit("resetGame", { sessionId });
@@ -91,6 +92,20 @@ export default function Session({
   const handleRevealCards = () => {
     socket.emit("revealCards", { sessionId });
   };
+
+  const handleCopyUrl = async () => {
+    await navigator.clipboard.writeText(
+      `${env.NEXT_PUBLIC_APP_URL}/session/${sessionId}`
+    );
+    toast.info("Link copiado para a área de transferência");
+  };
+
+  const handleCreateUserAndStartSession = async () => {
+    if (!newUserName) return;
+    setUser({ id: uuidv4(), name: newUserName, card: null });
+  };
+
+  const whoami = users.find((oldUser) => oldUser.id === user?.id);
 
   let voteCount = 0;
 
@@ -106,14 +121,17 @@ export default function Session({
     Math.abs(curr - mean) < Math.abs(prev - mean) ? curr : prev
   );
 
-  const handleCopyUrl = async () => {
-    const url = window.location.href;
-    await navigator.clipboard.writeText(url);
-    toast.info("Link copiado para a área de transferência");
-  };
+  const noUserHasVoted = users.every((user) => !user.card);
 
   return (
     <div className="relative flex h-screen w-full flex-col items-center">
+      <SessionNewUserModal
+        newUserName={newUserName}
+        setNewUserName={setNewUserName}
+        isOpen={!user?.id}
+        mode={mode}
+        handleCreateUserAndStartSession={handleCreateUserAndStartSession}
+      />
       <button
         onClick={handleCopyUrl}
         className="absolute left-8 top-8 text-xl tracking-wider text-white underline dark:text-emerald-500"
@@ -151,12 +169,14 @@ export default function Session({
         className="relative mx-auto flex w-[600px] flex-col items-center gap-12"
       >
         <button
+          disabled={noUserHasVoted}
+          style={{ cursor: noUserHasVoted ? "not-allowed" : "pointer" }}
           onClick={() =>
             !revealCards ? handleRevealCards() : handleResetGame()
           }
           className=" absolute left-[50%] top-[50%] flex h-12 w-60 translate-x-[-50%] translate-y-[-50%] transform items-center justify-center rounded-lg bg-[#a2884f] text-white dark:bg-emerald-600"
         >
-          <h1 className="text-md cursor-pointer font-semibold uppercase tracking-wider ">
+          <h1 className="text-md font-semibold uppercase tracking-wider ">
             {!revealCards ? "Revelar cartas" : "Nova rodada"}
           </h1>
         </button>
@@ -179,11 +199,6 @@ export default function Session({
                 )}
                 {revealCards && user.card && (
                   <motion.h1
-                    // onAnimationComplete={() => {
-                    //   if (index + 1 === users.length) {
-                    //     setAnimationFinished(true);
-                    //   }
-                    // }}
                     transition={{
                       delay: (voteCount + 1 * 0.07) / 2,
                     }}
@@ -238,8 +253,8 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
   return {
     props: {
       sessionId,
-      userId,
-      username,
+      userId: userId ?? null,
+      username: username ?? null,
     },
   };
 };

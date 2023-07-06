@@ -45,10 +45,9 @@ export const useHome = () => {
     copyUrl,
     createdUser,
   }: StartSessionProps) => {
-    const finalUser = createdUser ?? user;
     const sessionId = uuidv4();
     if (copyUrl) {
-      const url = `${window.location.origin}/session/${sessionId}?userId=${finalUser?.id}&username=${finalUser?.name}`;
+      const url = `${window.location.origin}/session/${sessionId}`;
       await navigator.clipboard.writeText(url);
     }
     setIsLoading(false);
