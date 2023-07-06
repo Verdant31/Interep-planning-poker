@@ -255,7 +255,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const cookies = parseCookies(ctx);
   const previousUser = JSON.parse(cookies.user || "{}");
 
-  if (previousUser) {
+  if (previousUser && (!userId || !username)) {
     return {
       props: {
         sessionId,
