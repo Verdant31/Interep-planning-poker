@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { motion } from "framer-motion";
 import { GetServerSideProps } from "next";
+import { parseCookies, setCookie } from "nookies";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import io from "socket.io-client";
@@ -103,6 +104,7 @@ export default function Session({
   const handleCreateUserAndStartSession = async () => {
     if (!newUserName) return;
     setUser({ id: uuidv4(), name: newUserName, card: null });
+    setCookie(null, "user", JSON.stringify(user));
   };
 
   const whoami = users.find((oldUser) => oldUser.id === user?.id);
@@ -248,8 +250,21 @@ export default function Session({
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async ({ query }) => {
-  const { sessionId, userId, username } = query;
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const { sessionId, userId, username } = ctx.query;
+  const cookies = parseCookies(ctx);
+  const previousUser = JSON.parse(cookies.user || "{}");
+
+  if (previousUser) {
+    return {
+      props: {
+        sessionId,
+        userId: previousUser.id,
+        username: previousUser.name,
+      },
+    };
+  }
+
   return {
     props: {
       sessionId,

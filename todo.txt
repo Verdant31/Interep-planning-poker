@@ -1,0 +1,3 @@
+1. Implementar modo espectador
+2. Implementar opção de jogar um café como carta
+3. Salvar o usuario após cria-lo na tentativa de entrar na sessão
