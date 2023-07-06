@@ -24,7 +24,7 @@ export const useHome = () => {
   const [isJoinSessionModalOpen, setIsJoinSessionModalOpen] = useState(false);
   const [isRedirectModalOpen, setIsRedirectModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [username, setUsername] = useState("Joaozin");
+  const [username, setUsername] = useState("");
   const [sessionId, setSessionId] = useState("");
 
   const router = useRouter();

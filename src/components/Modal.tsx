@@ -94,7 +94,7 @@ Modal.CreateUser = function CreateUserContent({ type }: CreateUserProps) {
         type="text"
         value={username}
         onChange={(e) => setUsername(e.target.value)}
-        placeholder="Ex: Joaozin pedrin"
+        placeholder="Ex: João É Senior"
         className="mt-2 w-full rounded-md border-[1px] border-gray-400 p-2 pl-4 text-black outline-none"
       />
       <button
