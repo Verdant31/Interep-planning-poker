@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
-import { StartSessionProps } from "~/hooks/useHome";
 
 interface CountdownProps {
-  handleStartSession: ({ copyUrl, createdUser }: StartSessionProps) => void;
+  handleStartSession: (copyUrl?: boolean) => void;
   handleRedirectToSession: () => void;
   sessionId: string;
 }
@@ -15,7 +14,7 @@ export const Countdown = ({
   const [time, setTime] = useState(10);
 
   useEffect(() => {
-    if (time === 10) handleStartSession({ copyUrl: true });
+    if (time === 10) handleStartSession(true);
     const timer = setTimeout(() => {
       setTime(time - 1);
     }, 1000);

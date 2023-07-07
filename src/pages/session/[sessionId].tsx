@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import io from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
 import { SessionNewUserModal } from "~/components/SessionNewUserModal";
+import SpecsList from "~/components/SpecsList";
 import { env } from "~/env.mjs";
 import { DefaultInterface } from "~/types";
 import { getPositionByIndex } from "~/utils/getPositionByIndex";
@@ -19,12 +20,14 @@ export type User = {
   id: string;
   name: string;
   card?: number | null;
+  role: "spec" | "player";
 };
 
 interface SessionProps extends DefaultInterface {
   sessionId: string;
   userId: string;
   username: string;
+  role: "spec" | "player";
 }
 
 export default function Session({
@@ -32,19 +35,20 @@ export default function Session({
   sessionId,
   userId,
   username,
+  role,
 }: SessionProps) {
   const [revealCards, setRevealCards] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
   const [newUserName, setNewUserName] = useState("");
   const [user, setUser] = useState<User | null>(
-    userId ? { id: userId, name: username, card: null } : null
+    userId ? { id: userId, name: username, card: null, role } : null
   );
 
   useEffect(() => {
     if (!sessionId || !user) return;
     socket.emit("joinSession", {
       sessionId,
-      user: { id: user.id, name: user.name, card: null },
+      user: { id: user.id, name: user.name, card: null, role },
     });
     socket.on("joinedSession", ({ users, newUser }) => {
       if (!(newUser.id === user.id)) {
@@ -101,9 +105,14 @@ export default function Session({
     toast.info("Link copiado para a área de transferência");
   };
 
+  const handleCopySessionId = async () => {
+    await navigator.clipboard.writeText(sessionId);
+    toast.info("Id da sessão copiado para a área de transferência");
+  };
+
   const handleCreateUserAndStartSession = async () => {
     if (!newUserName) return;
-    setUser({ id: uuidv4(), name: newUserName, card: null });
+    setUser({ id: uuidv4(), name: newUserName, card: null, role: "player" });
     setCookie(null, "user", JSON.stringify(user));
   };
 
@@ -125,8 +134,17 @@ export default function Session({
 
   const noUserHasVoted = users.every((user) => !user.card);
 
+  const onlyPlayersUsers = users.filter((user) => user.role === "player");
+  const specs = users.filter((user) => user.role === "spec");
+
   return (
     <div className="relative flex h-screen w-full flex-col items-center">
+      {specs && specs.length > 0 && whoami && (
+        <SpecsList
+          whoami={whoami}
+          specs={users.filter((user) => user.role === "spec")}
+        />
+      )}
       <SessionNewUserModal
         newUserName={newUserName}
         setNewUserName={setNewUserName}
@@ -139,6 +157,12 @@ export default function Session({
         className="absolute left-8 top-8 text-xl tracking-wider text-[#a2884f] underline dark:text-emerald-500"
       >
         Link da sessão
+      </button>
+      <button
+        onClick={handleCopySessionId}
+        className="absolute left-8 top-16 text-xl tracking-wider text-[#a2884f] underline dark:text-emerald-500"
+      >
+        ID da sessão
       </button>
       {revealCards && (
         <div>
@@ -182,8 +206,8 @@ export default function Session({
             {!revealCards ? "Revelar cartas" : "Nova rodada"}
           </h1>
         </button>
-        {users.length > 0 &&
-          users.map((user, index) => {
+        {onlyPlayersUsers.length > 0 &&
+          onlyPlayersUsers.map((user, index) => {
             if (user.card) voteCount += 1;
             return (
               <div
@@ -192,7 +216,7 @@ export default function Session({
                 key={user.id}
               >
                 <h1 className="text-xl dark:text-white">
-                  {user.name === username ? "Eu" : user.name}
+                  {user.name === username ? `${user.name} (Eu)` : user.name}
                 </h1>
                 {user.card && (
                   <h1 className="mt-1 text-sm font-semibold uppercase text-[#a2884f] dark:text-emerald-600">
@@ -215,45 +239,49 @@ export default function Session({
             );
           })}
       </main>
-
-      <div className="absolute bottom-16 flex items-center gap-6">
-        {fibonnaciSequence.map((number) => (
-          <button
-            disabled={revealCards}
-            onClick={() => handleChooseCard(number)}
-            key={number}
-            style={
-              whoami?.card === number
-                ? {
-                    cursor: revealCards ? "not-allowed" : "pointer",
-                    background: mode === "dark" ? "#059669" : "#a2884f",
-                  }
-                : {
-                    cursor: revealCards ? "not-allowed" : "pointer",
-                  }
-            }
-            className="flex h-32 w-16 cursor-pointer items-center justify-center rounded-md border-[1px] border-[#a2884f] dark:border-emerald-600"
-          >
-            <h1
-              style={{
-                color:
-                  whoami?.card === number && mode === "light" ? "white" : "",
-              }}
-              className="text-xl font-semibold text-zinc-600 dark:text-white"
+      {whoami?.role !== "spec" && (
+        <div className="absolute bottom-16 flex items-center gap-6">
+          {fibonnaciSequence.map((number) => (
+            <button
+              disabled={revealCards}
+              onClick={() => handleChooseCard(number)}
+              key={number}
+              style={
+                whoami?.card === number
+                  ? {
+                      cursor: revealCards ? "not-allowed" : "pointer",
+                      background: mode === "dark" ? "#059669" : "#a2884f",
+                    }
+                  : {
+                      cursor: revealCards ? "not-allowed" : "pointer",
+                    }
+              }
+              className="flex h-32 w-16 cursor-pointer items-center justify-center rounded-md border-[1px] border-[#a2884f] dark:border-emerald-600"
             >
-              {number}
-            </h1>
-          </button>
-        ))}
-      </div>
+              <h1
+                style={{
+                  color:
+                    whoami?.card === number && mode === "light" ? "white" : "",
+                }}
+                className="text-xl font-semibold text-zinc-600 dark:text-white"
+              >
+                {number}
+              </h1>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const { sessionId, userId, username } = ctx.query;
+  const { sessionId, userId, username, enterAsSpec } = ctx.query;
+
   const cookies = parseCookies(ctx);
   const previousUser = JSON.parse(cookies.user || "{}");
+
+  const role = enterAsSpec === "true" ? "spec" : "player";
 
   if (previousUser && (!userId || !username)) {
     return {
@@ -261,6 +289,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
         sessionId,
         userId: previousUser.id,
         username: previousUser.name,
+        role,
       },
     };
   }
@@ -270,6 +299,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
       sessionId,
       userId: userId ?? null,
       username: username ?? null,
+      role,
     },
   };
 };

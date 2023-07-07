@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { type Mode } from "@anatoliygatt/dark-mode-toggle";
-import { Dialog, Transition } from "@headlessui/react";
+import { Dialog, Switch, Transition } from "@headlessui/react";
 import { Fragment, useCallback } from "react";
 import { PacmanLoader } from "react-spinners";
 import { useHome } from "~/hooks/useHome";
@@ -118,7 +118,13 @@ Modal.CreateUser = function CreateUserContent({ type }: CreateUserProps) {
 };
 
 Modal.JoinSession = function JoinSessionContent() {
-  const { handleRedirectToSession, sessionId, setSessionId } = useHome();
+  const {
+    handleRedirectToSession,
+    sessionId,
+    setSessionId,
+    enterAsSpec,
+    setEnterAsSpec,
+  } = useHome();
   return (
     <div className="mr-[6px]">
       <h1>Entre abaixo com o ID da sessão:</h1>
@@ -129,6 +135,23 @@ Modal.JoinSession = function JoinSessionContent() {
         placeholder="Ex: d1864bad-73fc-43b9-9ef6-fce142012fba"
         className="mt-2 w-full rounded-md border-[1px] border-gray-400 p-2 pl-4 text-black outline-none"
       />
+
+      <div className="mt-4 flex items-center gap-4">
+        <Switch
+          checked={enterAsSpec}
+          onChange={setEnterAsSpec}
+          className={`${
+            enterAsSpec ? "bg-emerald-600" : "bg-gray-200"
+          } relative inline-flex h-6 w-11 items-center rounded-full`}
+        >
+          <span
+            className={`${
+              enterAsSpec ? "translate-x-6" : "translate-x-1"
+            } inline-block h-4 w-4 transform rounded-full bg-white transition`}
+          />
+        </Switch>
+        <span>Entrar como espectador</span>
+      </div>
       <button
         onClick={handleRedirectToSession}
         className="mt-4 h-12 w-full bg-[#a2884f] text-white dark:bg-emerald-600"
