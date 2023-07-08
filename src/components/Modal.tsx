@@ -154,7 +154,7 @@ Modal.JoinSession = function JoinSessionContent() {
         <span>Entrar como espectador</span>
       </div>
       <button
-        onClick={handleRedirectToSession}
+        onClick={() => handleRedirectToSession()}
         className="mt-4 h-12 w-full bg-[#a2884f] text-white dark:bg-emerald-600"
       >
         Entrar na sessão

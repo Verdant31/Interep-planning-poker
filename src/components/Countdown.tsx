@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 interface CountdownProps {
   handleStartSession: (copyUrl?: boolean) => void;
-  handleRedirectToSession: () => void;
+  handleRedirectToSession: (passBy?: boolean) => void;
   sessionId: string;
 }
 
@@ -20,7 +20,7 @@ export const Countdown = ({
     }, 1000);
 
     if (time === 0) {
-      handleRedirectToSession();
+      handleRedirectToSession(true);
       clearTimeout(timer);
     }
   }, [time]);
@@ -30,7 +30,7 @@ export const Countdown = ({
       <h1 className="mt-4 text-center text-xl">{time} segundos</h1>
       {sessionId && (
         <button
-          onClick={handleRedirectToSession}
+          onClick={() => handleRedirectToSession(true)}
           className="mt-2 text-[12px] uppercase underline"
         >
           redirecionar agora

@@ -31,25 +31,32 @@ export const useHome = () => {
     return user as { name: string; id: string };
   });
 
-  const handleRedirectToSession = useCallback(async () => {
-    const sessions = await fetch(`${env.NEXT_PUBLIC_API_URL}/sessions`, {
-      method: "GET",
-    }).then((res) => res.json());
+  const handleRedirectToSession = useCallback(
+    async (passBy?: boolean | undefined) => {
+      const url = `/session/${sessionId}?userId=${user?.id}&username=${user?.name}&enterAsSpec=${enterAsSpec}`;
+      if (passBy) {
+        router.push(url);
+        return;
+      }
 
-    const findSession = sessions?.find(
-      (session: any) => session.id === sessionId
-    ) as { id: string; users: { id: string }[] };
-    if (!findSession) {
-      setError("Sessão não encontrada.");
-      setTimeout(() => {
-        setError("");
-      }, 3000);
-      return;
-    }
-    router.push(
-      `/session/${sessionId}?userId=${user?.id}&username=${user?.name}&enterAsSpec=${enterAsSpec}`
-    );
-  }, [enterAsSpec, router, sessionId, user?.id, user?.name]);
+      const sessions = await fetch(`${env.NEXT_PUBLIC_API_URL}/sessions`, {
+        method: "GET",
+      }).then((res) => res.json());
+      console.log(sessions);
+      const findSession = sessions?.find(
+        (session: any) => session.sessionId === sessionId
+      ) as { id: string; users: { id: string }[] };
+      if (!findSession) {
+        setError("Sessão não encontrada.");
+        setTimeout(() => {
+          setError("");
+        }, 3000);
+        return;
+      }
+      router.push(url);
+    },
+    [enterAsSpec, router, sessionId, user?.id, user?.name]
+  );
 
   const handleStartSession = async (copyUrl?: boolean) => {
     const sessionId = uuidv4();
