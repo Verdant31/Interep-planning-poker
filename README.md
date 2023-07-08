@@ -1,28 +1,75 @@
-# Create T3 App
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+<h1 align="center">
+  <br>
+ <img src="https://github.com/Verdant31/planning-poker-socket/assets/71015476/4d15ad60-80fb-4a5a-b78d-681a13297ad1" alt="Markdownify" width="200">
+  <br>
+  Planning Poker (Front)
+  <br>
+</h1>
 
-## What's next? How do I make an app with this?
+<h4 align="center">Application in <a href="[http://electron.atom.io](https://nextjs.org/)" target="_blank">NextJS</a> to help in the company's planning rites.</h4>
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+<p align="center">
+  <a href="https://www.linkedin.com/in/jo%C3%A3o-pedro-soares-piovesan-724235191/">
+    <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" />
+  </a>
+    <a href="https://mail.google.com/mail/u/0/?source=mailto&to=verdantxd@gmail.com&fs=1&tf=cm">
+    <img src="https://img.shields.io/badge/Gmail-D14836?style=for-the-badge&logo=gmail&logoColor=white" />
+  </a>
+      <a href="https://medium.com/@verdantxd">
+    <img src="https://img.shields.io/badge/Medium-12100E?style=for-the-badge&logo=medium&logoColor=white" />
+  </a>
+</p>
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+<p align="center">
+  <img src="https://github.com/Verdant31/planning-poker-socket/assets/71015476/0e30652c-b1ab-4578-a3c8-fec3613a28ae" alt="animated" />
+</p>
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+## Key Features
 
-## Learn More
+* Multiple users allowed in session
+* Spec mode
+* Fibonacci scale
+* One-time sign up
+* Dark/Light mode
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+## How To Use
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+To clone and run this application, you'll need [Git](https://git-scm.com) and [Node.js](https://nodejs.org/en/download/) (which comes with [npm](http://npmjs.com)) installed on your computer. From your command line:
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+```bash
+# Clone this repository
+$ git clone https://github.com/Verdant31/planning-poker-client
 
-## How do I deploy this?
+# Go into the repository
+$ cd planning-poker-client
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+# Install dependencies
+$ npm install
+
+# Run the app
+$ npm start
+```
+
+> **Note**
+> You will need to do the same process to the API https://github.com/Verdant31/planning-poker-socket
+
+## Credits
+
+This software uses the following open source packages:
+
+- [Node.js](https://nodejs.org/)
+- [T3.app](https://create.t3.gg/)
+- [Socket.io](https://socket.io/)
+- [TailwindCSS](https://tailwindcss.com/)
+- [Tanstack](https://tanstack.com/)
+
+## Support
+
+<a href="https://www.buymeacoffee.com/verdantxdL" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/purple_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a>
+
+## License
+
+MIT
+
+---
