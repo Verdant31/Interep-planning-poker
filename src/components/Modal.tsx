@@ -124,6 +124,7 @@ Modal.JoinSession = function JoinSessionContent() {
     setSessionId,
     enterAsSpec,
     setEnterAsSpec,
+    error,
   } = useHome();
   return (
     <div className="mr-[6px]">
@@ -135,7 +136,7 @@ Modal.JoinSession = function JoinSessionContent() {
         placeholder="Ex: d1864bad-73fc-43b9-9ef6-fce142012fba"
         className="mt-2 w-full rounded-md border-[1px] border-gray-400 p-2 pl-4 text-black outline-none"
       />
-
+      {error && <p className="mt-2 text-red-500">{error}</p>}
       <div className="mt-4 flex items-center gap-4">
         <Switch
           checked={enterAsSpec}

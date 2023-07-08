@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { parseCookies, setCookie } from "nookies";
 import { useCallback, useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
+import { env } from "~/env.mjs";
 
 export type ModalState = {
   isOpen: boolean;
@@ -20,6 +21,7 @@ export const useHome = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [username, setUsername] = useState("");
   const [sessionId, setSessionId] = useState("");
+  const [error, setError] = useState("");
 
   const router = useRouter();
 
@@ -30,6 +32,20 @@ export const useHome = () => {
   });
 
   const handleRedirectToSession = useCallback(async () => {
+    const sessions = await fetch(`${env.NEXT_PUBLIC_API_URL}/sessions`, {
+      method: "GET",
+    }).then((res) => res.json());
+
+    const findSession = sessions?.find(
+      (session: any) => session.id === sessionId
+    ) as { id: string; users: { id: string }[] };
+    if (!findSession) {
+      setError("Sessão não encontrada.");
+      setTimeout(() => {
+        setError("");
+      }, 3000);
+      return;
+    }
     router.push(
       `/session/${sessionId}?userId=${user?.id}&username=${user?.name}&enterAsSpec=${enterAsSpec}`
     );
@@ -82,5 +98,6 @@ export const useHome = () => {
     hasUser,
     setEnterAsSpec,
     enterAsSpec,
+    error,
   };
 };
