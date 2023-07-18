@@ -216,7 +216,7 @@ export default function Session({
             return (
               <div
                 className="absolute flex flex-col items-center"
-                style={getPositionByIndex(index)}
+                style={getPositionByIndex(index, onlyPlayersUsers?.length)}
                 key={user.id}
               >
                 <h1 className="text-xl dark:text-white">
