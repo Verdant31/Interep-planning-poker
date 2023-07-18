@@ -1,10 +1,22 @@
+import { useQuery } from "@tanstack/react-query";
 import { ClipLoader } from "react-spinners";
+import { toast } from "react-toastify";
 import { Modal } from "~/components/Modal";
+import { env } from "~/env.mjs";
 import { useHome } from "~/hooks/useHome";
 import { DefaultInterface } from "~/types";
 
 export default function Home({ mode }: DefaultInterface) {
   const { isLoading, modalState, setModalState } = useHome();
+
+  useQuery(["warmup"], async () => {
+    const res = await fetch(`${env.NEXT_PUBLIC_API_URL}/warmup`, {
+      method: "GET",
+    });
+    if (res.status !== 200) {
+      toast.error("Error warming up the server");
+    }
+  });
 
   return (
     <main className="mx-auto mt-20 flex w-96 flex-col items-center gap-12">
