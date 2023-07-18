@@ -42,7 +42,7 @@ export const useHome = () => {
       const sessions = await fetch(`${env.NEXT_PUBLIC_API_URL}/sessions`, {
         method: "GET",
       }).then((res) => res.json());
-      console.log(sessions);
+
       const findSession = sessions?.find(
         (session: any) => session.sessionId === sessionId
       ) as { id: string; users: { id: string }[] };

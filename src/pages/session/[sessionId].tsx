@@ -112,8 +112,12 @@ export default function Session({
 
   const handleCreateUserAndStartSession = async () => {
     if (!newUserName) return;
-    setUser({ id: uuidv4(), name: newUserName, card: null, role: "player" });
-    setCookie(null, "user", JSON.stringify(user));
+    const newUser = {
+      name: newUserName,
+      id: uuidv4(),
+    };
+    setUser({ id: newUser.id, name: newUser.name, card: null, role: "player" });
+    setCookie(null, "user", JSON.stringify(newUser));
   };
 
   const whoami = users.find((oldUser) => oldUser.id === user?.id);
@@ -282,8 +286,11 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const previousUser = JSON.parse(cookies.user || "{}");
 
   const role = enterAsSpec === "true" ? "spec" : "player";
-
-  if (previousUser && (!userId || !username)) {
+  if (
+    previousUser &&
+    Object.keys(previousUser)?.length > 0 &&
+    (!userId || !username)
+  ) {
     return {
       props: {
         sessionId,

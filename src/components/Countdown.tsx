@@ -12,6 +12,7 @@ export const Countdown = ({
   handleRedirectToSession,
 }: CountdownProps) => {
   const [time, setTime] = useState(10);
+  const [clicked, setClicked] = useState(false);
 
   useEffect(() => {
     if (time === 10) handleStartSession(true);
@@ -25,12 +26,18 @@ export const Countdown = ({
     }
   }, [time]);
 
+  const handleRedirectBeforeTime = () => {
+    handleRedirectToSession(true);
+    setClicked(true);
+  };
+
   return (
     <div className="mx-auto flex flex-col items-center justify-center">
       <h1 className="mt-4 text-center text-xl">{time} segundos</h1>
       {sessionId && (
         <button
-          onClick={() => handleRedirectToSession(true)}
+          style={{ visibility: clicked ? "hidden" : "visible" }}
+          onClick={handleRedirectBeforeTime}
           className="mt-2 text-[12px] uppercase underline"
         >
           redirecionar agora
